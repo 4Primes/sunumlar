@@ -1,0 +1,693 @@
+Play2 with Scala
+================
+:encoding: UTF-8
+:numbered:
+:iconsdir: /usr/share/asciidoc/images/icons/ 
+
+Play2
+-----
+
+.Fully non-blocking/asynchronous
+Requestler threadleri bloklamaz. Bu sayade bir thread birden fazla isteğe cevap verebilir.
+
+.Stateless
+Server tarafında hiçbir state bilgisi tutulmaz.
+
+.RESTful
+Client-Server iletişimi HTTP protokolü üzerinden sağlanır.
+
+.Hot reloading
+Kod değişikliğinizi sayfayı yenileyerek görebilirsiniz.
+
+.Template engine
+HTML, XML gibi text tabanlı döküman oluşturmak için kullanılır.
+
+.HTTP routing
+Gelen HTTP Requestler ilgli Actionlara yönlendirilir.
+
+.Full stack framework
+All in one
+
+
+
+Sample-App
+----------
+
+
+. *Kullanıcı oluşturma*
+.. Client'dan gelen verinin validasyonu
+.. İlgili modele( User(name,email,password) ) map edilip veritabanına kaydı
+
+. *Tüm kullanıcıları görüntüleme* 
+.. Veritabanı sorgusu   
+
+. *Kullanıcı silme*
+.. Verilen id'ye sahip kullanıcıyı veritabanından silme
+
+
+
+Gereksinimler:
+~~~~~~~~~~~~~~
+
+* mongodb 
+* play-2.1.0
+
+Çalışma ortamını düzenleme:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Play klasörünü PATH'e ekleme:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+----
+// ~/.bashrc
+
+export PATH="$PATH:path-to-play2"
+----
+
+play1.x bilgisayarında kurulu olanlar:
+++++++++++++++++++++++++++++++++++++++
+
+----
+$ mv /path-to-play2/play /path-to-play2/play2
+----
+
+CAUTION: Bundan sonraki tüm "play" komutlarının "play2" olarak kullanılması gerekir.
+
+
+mongodb'yi çalıştırma:
+^^^^^^^^^^^^^^^^^^^^^^
+
+mongodb instance:
++++++++++++++++++
+
+----
+$ mkdir sampleMongo
+$ /usr/bin/mongod --dbpath sampleMongo/       
+----
+
+mongodb service:
+++++++++++++++++
+
+----
+$ sudo service mongodb start 
+----
+
+
+Yeni proje oluşturma:
+^^^^^^^^^^^^^^^^^^^^^^
+
+----
+$ play new workshop-sample
+$ cd workshop-sample
+$ play run
+----
+
+
+Kullanıcı oluşturma
+~~~~~~~~~~~~~~~~~~
+
+Model:
+^^^^^^
+
+----
+// app/models/User.scala
+
+package models
+
+case class User(name: String, email: String, password: String)                //case class
+object User {                                                                 //companion object
+}
+----
+
+Companion Object:
++++++++++++++++++
+
+* Class'in akabinde tanımlanır.
+* Aynı source'da bulunurlar.
+* Class'in private memberlarına ulaşma izni vardır.
+
+
+Form:
+^^^^^
+
+TIP: Form: Server'a göndermek üzere kullanıcıdan data alınan html elementi.
+
+Form template oluşturarak yapabilabilecekler:
+* Form'un içeriğinin ne olacağı
+* Form'dan gelen verilerin validasyonu
+* Verilerin modele bind edilmesi
+
+Form template oluşturma:
++++++++++++++++++++++++
+
+----
+//app/models/User.scala
+
+import play.api.data._
+import play.api.data.Forms._
+import play.api.data.validation.Constraints._
+import play.api.libs.Codecs._
+
+
+object User {
+
+  val userForm = Form(mapping (                                                     // template form
+    "name" -> nonEmptyText,                                 
+    "email" -> email,                                                               
+    "password" -> nonEmptyText      
+    )                                                           
+  )
+}
+----
+
+Validation:
++++++++++++
+
+* Ön tanımlı validasyonlar:
+
+----
+//play.api.data.validation.Constraints
+
+def max (maxValue: Int): Constraint[Int]
+def maxLength (length: Int): Constraint[String]
+def min (minValue: Int): Constraint[Int]
+def minLength (length: Int): Constraint[String]
+def nonEmpty : Constraint[String]
+def pattern (regex: ⇒ Regex, name: String = "constraint.pattern", error: String = "error.pattern"): Constraint[String]
+----
+
+Örneğin:
+
+----                                                     
+    "name" -> nonEmptyText.verifying(minLength(3))                                  // minimum 3 karakter
+----
+
+* Custom validation:
+
+Kendi validasyonunuzu tanımlayabilirsiniz.
+
+----
+//play.api.data.Mappings
+
+def verifying (error: ⇒ String, constraint: (T) ⇒ Boolean): Mapping[T]
+def verifying (constraint: (T) ⇒ Boolean): Mapping[T]
+----
+
+Örneğin:
+
+----
+  "password" -> nonEmptyText.verifying("not containing !", _.contains("!"))         // "!" içeren text 
+----
+
+Binding
++++++++
+
+----
+val userForm = Form(mapping (                                                     
+  //Some code...   
+)
+(User.apply)(User.unapply) 
+----
+
+* Custom binding:
+
+----
+import play.api.libs.Codecs._
+
+val userForm = Form(mapping (                                                     
+  //Some code...   
+  )
+  {                                                                                 //binding     
+    (name, email, password) => User(name, email, sha1(password))                      // şifreyi hashle  
+  }
+  {                                                                                 //unbinding        
+    user => Some(user.name,user.email,"")                                             // şifre kısmını boş bırak
+  }                                                         
+)
+----
+
+View:
+^^^^
+
+* Kullanıcı oluşturma sayfası.
+
+Eğer standart form oluştursaydık:
+
+----
+// app/views/user.scala.html
+
+@main("Sample App"){
+  <form id="signup" action="/user" method="POST" accept-charset="${_response_encoding}">
+  <p>
+    <label>Name</label>
+    <input type="text" name="name"  />
+  </p>
+  <p>
+    <label>Email</label>
+    <input type="text" name="email" />
+  </p>
+  <p>
+    <label>Password</label>
+    <input type="password" name="password" /> 
+  </p>
+    <input type="submit" value="Signup"/> 
+</form>
+}
+----
+
+Helpers
++++++++
+
+Helper sayesinde;
+
+* İlgili field'ın template-form'da hangi alana karşılık düştüğünü
+* Field'ın türünü
+* Hatalı giriş yapıldığına görüntülenecek uyarı mesajını
+
+kolayca belirleyebiliyoruz.
+
+Ihtiyaca göre düzenlenebilir.
+
+----
+// views.html.helper.FieldConstructor
+
+def apply (f: (FieldElements) ⇒ Html): FieldConstructor
+----
+
+Helper'lar yardımıyla oluşturulmuş form:
+
+----
+// app/views/user.scala.html
+
+@(userForm:Form[models.User])                                                       //alınan parametreler
+@import helper._
+
+@main("Sample App"){
+  @form(routes.Application.newUser){                                                //form isteğinin gideceği yer
+    <div>
+      <ul>
+        <li>
+          @inputText( userForm("name"))                                                    
+        </li>
+        <li>
+          @inputText( userForm("email")) 
+        </li>
+        <li>
+          @inputPassword( userForm("password"))     
+        </li>
+      </ul>
+    </div>      
+    <input type= "submit" value= "Create" >   
+    
+  }     
+}
+----
+
+Controller:
+^^^^^^^^^^^
+
+Kullanıcı oluşturma formunu render etme:
+++++++++++++++++++++++++++++++++++++++++
+
+----
+// app/controllers/Application.scala
+
+package controllers
+
+import play.api._
+import play.api.mvc._
+
+import models._
+
+object Application extends Controller with MongoController{
+
+def user = Action {                                                              
+    Ok(views.html.user(User.userForm))                                           
+  }
+}
+---- 
+
+Route belirleme:
+++++++++++++++++
+
+----
+// app/conf/routes
+
+GET     /user           controllers.Application.user
+----
+
+Artık localhost:9000/user urlsi bizi kullanıcı oluşturma sayfasına yönlendirebilir.
+
+WARNING: "user.scala.html" de belirttiğimiz "Application.newUser" metodu henüz tanımlanmadığından hata alınacaktır.
+
+Veritabanına kayıt
+^^^^^^^^^^^^^^^^^^
+
+ReactiveMongo
++++++++++++++
+
+* non-blocking mongodb server.
+* Play2 iteratee'lerini kullanır.
+Iteratee: Belirli bir veri öbeği(List, Dosya, Veri Tabanı, Stream vs.) üzerinde non-blocking iterasyon sağlar. 
+Enumerator (produce data) → Enumeratee (map data) → Iteratee (consume data)
+
+
+* Bağımlılıkları düzenleme: 
+
+----
+//project/Build.scala
+
+
+import sbt._
+import Keys._
+import play.Project._
+
+object ApplicationBuild extends Build {
+
+  val appName         = "workshop-sample"
+  val appVersion      = "1.0-SNAPSHOT"
+
+  val appDependencies = Seq(
+    "reactivemongo" %% "reactivemongo" % "0.1-SNAPSHOT" cross CrossVersion.full,
+    "play.modules.reactivemongo" %% "play2-reactivemongo" % "0.1-SNAPSHOT" cross CrossVersion.full
+  )
+
+  val main = play.Project(appName, appVersion, appDependencies).settings(   
+    resolvers += "sgodbillon" at "https://bitbucket.org/sgodbillon/repository/raw/master/snapshots/"  
+  )
+
+}
+----
+
+* ReactiveMongo plugini ekleme:
+
+----
+//conf/play.plugins
+
+400:play.modules.reactivemongo.ReactiveMongoPlugin
+----
+
+* Veritabanı konfigürasyonu:
+
+----
+//conf/application.conf
+
+# Database configuration
+mongodb.servers = ["127.0.0.1:27017"]
+mongodb.db = "testDB"
+----
+
+* importlar:
+
+----
+// app/controllers/Application.scala
+
+import play.api.libs.functional.syntax._
+import play.api.Play.current
+
+import reactivemongo.api._
+import reactivemongo.bson._
+import reactivemongo.bson.handlers.DefaultBSONHandlers._
+
+import play.modules.reactivemongo._
+import play.modules.reactivemongo.PlayBsonImplicits._
+----
+
+Formdan gelen POST isteğini handle etme:
+++++++++++++++++++++++++++++++++++++++++++
+
+----
+// app/controllers/Application.scala
+
+object Application extends Controller with MongoController{
+
+  val db = ReactiveMongoPlugin.db                             
+  val collection = db.collection("testcollection")
+
+  //Some code...
+
+  def newUser = Action{ implicit request =>   /*1*/                      
+    User.userForm.bindFromRequest.fold(     /*2*/
+      formWithErrors => {                                                           //if form has errors         
+        Ok(views.html.user(formWithErrors))                                         //render form with errors     
+      },
+      value => {                                                                    //if post value is valid       
+        Async{                             /*3*/                                               
+          val user = BSONDocument(                                                  //create new json for writing to database 
+            "name" -> BSONString(value.name),
+            "email" -> BSONString(value.email),
+            "password" -> BSONString(value.password)
+          )                         
+          collection.insert[BSONDocument](user).map(_ => /*4*/                      //write value to the database
+            Redirect(routes.Application.index)                                      //redirect to index page 
+          )
+        }
+      }
+    )
+  }
+}
+----
+
+NOTE: 1) implicit parameter: Değer belirtilmemiş ise Scope'unda tanımlanmış implicit değişkeni kullanır.
+
+----
+> def p(implicit i:Int) = print(i)
+> implicit val v=2
+> p                             
+> p(1)
+----
+
+NOTE: 2) bindFromRequest: Request'deki datayı forma bind eder.
+
+NOTE: 3) Async block: Promise[result]'ı AsyncResult'a dönüştürür. (play.api.mvc.AsyncResult)
+Bu da play HTTP response hazır olana request'i askıya alır. 
+Dolayısıyla thread boşa çıkar, diğer request'lere cevap verebilir.
+
+NOTE: 4) insert().map(): Insert metodu Future döndürür. 
+
+----
+//reactivemongo.api.Collection
+
+def insert[T](document: T)(implicit writer: RawBSONWriter[T], ec: ExecutionContext): Future[LastError]
+----
+
+Dönen future degerini kullanmak için(değer oluştuğunda yapılacak işlemi tanımlamak için) map kullanılır.
+Map future değeri(burada Future[LastError]) normal değere(LastError) döndürür gibi düşünülebilir.
+
+Route
++++++
+
+----
+// app/conf/routes
+
+POST    /user                 controllers.Application.newUser
+----
+
+TIP: Su anda eğer herşey doğru yapıldıysa localhost:9000/user urlsine erişebilir ve form doldurularak kullanıcı veritabanına kaydedilebilir.
+
+Kullanıcıları görüntüleme
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Veritabanı sorgusu
+^^^^^^^^^^^^^^^^^^
+
+* Reactivemongo find sorgusu:
+
+----
+// reactivemongo.api.Collection
+
+def find[Rst](query: QueryBuilder)(implicit handler: BSONReaderHandler, reader: RawBSONReader[Rst], ec: ExecutionContext): FlattenedCursor[Rst]
+----
+
+QueryBuilder: Mongodb sorgu dokümanı oluşturur.
+
+Örneğin:
+
+----
+val qb = QueryBuilder().query(BSONDocument(
+      "name" -> BSONString("hasan")))
+
+//mongodb'deki karşılığı:
+
+>db.testcollection.find( {name: "hasan"} )  
+----
+
+Tüm kullanıcıları bulma:
+
+----
+// app/controllers/Application.scala
+
+import play.api.libs.json._
+
+val db = ReactiveMongoPlugin.db                             
+val collection = db.collection("testcollection")
+implicit val userFormat = Json.format[User]
+
+def index = Action {  
+    Async{
+      val qb = QueryBuilder().query( BSONDocument() )                  //db.testcollection.find() hepsini bulur
+      (collection.find[JsValue](qb).toList).map(jsusers =>{
+        val users=jsusers.map(jsuser => 
+          jsuser.as[User])       
+        Ok(views.html.index(users))  
+      })
+    }
+} 
+----
+
+CAUTION: Simplified json-reads şekli companion objectlerle birlikte çalışmadığı için companion objesinini adını değiştiriyoruz.
+
+----
+// app/models/User.scala
+
+object UserM{...}
+
+//app/controller/Application.scala
+
+ def newUser = Action{ implicit request =>   /*1*/                      
+    UserM.userForm.bindFromRequest.fold(..) 
+ }  
+
+
+ def user = Action {                                                              
+    Ok(views.html.user(UserM.userForm))                                           
+ }
+----
+
+View'de alınan veriyi işleme
+
+----
+// app/views/index.scala.html
+
+@(users: List[models.User])
+
+@main("Sample App") {
+  <a href="/user">new</a>
+  <ul>
+    @users.map { user =>
+      <li>
+       <ul class="user">
+        <li>@user.name</li>
+        <li>@user.email</li>
+        <li>@user.password</li>
+       </ul>
+      </li>
+    }
+  </ul>   
+}
+----
+
+css
+
+----
+// public/stylesheets/main.css
+
+.user li{
+ display:inline;
+ margin-left: 10px;
+}
+----
+
+TIP: İşler yolundaysa localhost:9000'de kullanıcılarin görüntülenmesi lazım
+
+
+Kullanıcı Silme
+~~~~~~~~~~~~~~~
+
+Kullanıcı silme için id gerekli.
+
+Modele id ekleme:
+^^^^^^^^^^^^^^^^^
+----
+// app/models/User.scala
+
+case class User(id: Option[String] = None, name: String, email: String, password: String)
+...
+
+...
+{                                                                                 //binding     
+      (name, email, password) => User(None, name, email, sha1(password))          
+}
+----
+
+TIP: mongodb de object id  { _id: { oid:"..."} ...} şeklinde tutulduğu için json-reads direk okuyamıyor.
+Bunun için veritabanından gelen json'u { id:"..."} olacak şekilde düzenleyen bir validator kullanılıyor.
+
+----
+// app/controllers/Application.scala
+
+val idfixer= __.json.update( (__ \ 'id).json.copyFrom( (__ \ '_id \ '$oid).json.pick ) )
+
+
+def index = Action {  
+    Async{
+      ...
+        val users=jsusers.map(jsuser => 
+          jsuser.validate(idfixer).get.as[User])       
+      ...
+}  
+----
+
+Kullanıcı silme metodu:
+
+----
+// app/controllers/Application.scala
+
+def removeUser(id: String) = Action{ implicit request =>
+  Async{
+    val qry =SONDocument("_id" -> new BSONObjectID(id))   
+    collection.remove(qry).map(_ =>
+      Redirect(routes.Application.index)
+    )
+  }
+}
+----
+
+View'de silme butonu:
+
+----
+// app/views/index.scala.html
+
+<ul class="user">
+  ...
+  <li><a href="/remove/@user.id">Sil</a>
+</ul>
+----
+
+Route:
+
+----
+// app/conf/routes
+
+GET    /remove/:id              controllers.Application.removeUser(id: String)
+-
+Benchmark
+---------
+
+----
+$ ab -n 1000 -c 5 -p ~/Desktop/post -T "application/x-www-form-urlencoded"  http://localhost:9000/user
+
+-n -> number of requests
+-c -> concurrent requests
+-p -> post data
+-T -> post type
+----
+
+Bağlantılar
+-----------
+
+- http://www.playframework.org
+- http://groups.google.com/group/play-framework
+- http://groups.google.com/group/play-framework-tr
+- http://www.reactivemongo.org
+- https://groups.google.com/forum/?fromgroups#!forum/reactivemongo
+
+.Further reading
+
+- http://www.infoq.com/presentations/Play-I-ll-See-Your-Async-and-Raise-You-Reactive?utm_source=infoq&utm_medium=related_content_link&utm_campaign=relatedContent_interviews_clk
+- http://stephane.godbillon.com/2012/08/30/reactivemongo-for-scala-unleashing-mongodb-streaming-capabilities-for-realtime-web
+- http://stephane.godbillon.com/2012/10/18/writing-a-simple-app-with-reactivemongo-and-play-framework-pt-1.html
+- http://mandubian.com/2012/08/27/understanding-play2-iteratees-for-normal-humans/
+- http://engineering.klout.com/2013/01/iteratees-in-big-data-at-klout/

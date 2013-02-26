@@ -1,0 +1,1 @@
+asciidoc -a data-uri -a icons -a toc2 -a theme=volnitsky -a max-width=100em play2.txt

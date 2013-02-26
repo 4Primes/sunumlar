@@ -1,0 +1,2058 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 8.6.7" />
+<title>Play2 with Scala</title>
+<style type="text/css">
+/*
+ * AsciiDoc 'volnitsky' theme for xhtml11 and html5 backends.
+ * Based on css from http://volnitsky.com, which was in turn based on default
+ * theme from AsciiDoc
+ *
+ * FIXME: The styling is still a bit rough in places.
+ *
+ */
+
+/* Default font. */
+body {
+  font-family: Georgia,"Times New Roman",Times,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Candara,Arial,sans-serif;
+}
+
+
+#toc a {
+    border-bottom: 1px dotted #999999;
+    color: #3A3A4D !important;
+    text-decoration: none !important;
+}
+#toc a:hover {
+    border-bottom: 1px solid #6D4100;
+    color: #6D4100 !important;
+    text-decoration: none !important;
+}
+a { color: #666688; text-decoration: none; border-bottom: 1px dotted #666688; }
+a:visited { color: #615FA0; border-bottom: 1px dotted #615FA0; }
+a:hover { color: #6D4100; border-bottom: 1px solid #6D4100; }
+
+em {
+  font-style: italic;
+  color: #444466;
+}
+
+strong {
+  font-weight: bold;
+  color: #444466;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #666688;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+  letter-spacing:+0.15em;
+}
+
+h1, h2, h3 { border-bottom: 2px solid #ccd; }
+h2 { padding-top: 0.5em; }
+h3 { float: left; }
+h3 + * { clear: left; }
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid #444466;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+
+pre {
+  padding: 0;
+  margin: 0;
+}
+
+#author {
+  color: #444466;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+
+div.tableblock, div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+
+div.admonitionblock {
+  margin-top: 2.5em;
+  margin-bottom: 2.5em;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #444466;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid silver;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid silver;
+  background: #f4f4f4;
+  padding: 0.5em;
+}
+
+div.quoteblock {
+  padding-left: 2.0em;
+  margin-right: 10%;
+}
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock {
+  padding-left: 2.0em;
+  margin-right: 10%;
+}
+div.verseblock > pre.content {
+  font-family: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #444466;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 2px solid silver;
+}
+
+div.exampleblock > div.content {
+  border-left: 2px solid silver;
+  padding: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: #444466;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+div.tableblock > table {
+  border: 3px solid #444466;
+}
+thead {
+  font-weight: bold;
+  color: #444466;
+}
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: #444466;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toctitle {
+  color: #666688;
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 { margin-top: 0; margin-bottom: 0; }
+div.toclevel1 { margin-top: 0.3em; margin-left: 0; font-size: 1.0em; }
+div.toclevel2 { margin-top: 0.25em; margin-left: 2em; font-size: 0.9em; }
+div.toclevel3 { margin-left: 4em; font-size: 0.8em; }
+div.toclevel4 { margin-left: 6em; font-size: 0.8em; }
+
+body {
+  margin: 1em 5%;
+  max-width:  55em;
+  padding-left: 0;
+
+}
+
+.monospaced, tt, div.listingblock > div.content {
+  font-family:  Consolas, "Andale Mono", "Courier New", monospace;
+  color: #004400;
+  background: #f4f4f4;
+  max-width: 80em;
+  line-height: 1.2em;
+}
+
+.paragraph p  {
+  line-height: 1.5em;
+  margin-top: 1em;
+}
+
+.paragraph p, li, dd, .content { max-width: 45em; }
+.admonitionblock               { max-width: 35em; }
+
+div.sectionbody div.ulist > ul > li {
+  list-style-type: square;
+  color: #aaa;
+}
+  div.sectionbody div.ulist >  ul > li > * {
+    color: black;
+    /*font-size: 50%;*/
+  }
+
+
+div.sectionbody div.ulist > ul > li div.ulist > ul > li {
+  color: #ccd ;
+}
+  div.sectionbody div.ulist > ul > li div.ulist > ul > li > * {
+    color: black ;
+  }
+
+em {
+  font-style: normal ! important;
+  font-weight: bold ! important;
+  color: #662222   ! important;
+  letter-spacing:+0.08em ! important;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #666688;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #444466;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #444466;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+@media screen {
+  body {
+    max-width: 50em; /* approximately 80 characters wide */
+    margin-left: 16em;
+  }
+
+  #toc {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 13em;
+    padding: 0.5em;
+    padding-bottom: 1.5em;
+    margin: 0;
+    overflow: auto;
+    border-right: 3px solid #f8f8f8;
+    background-color: white;
+  }
+
+  #toc .toclevel1 {
+    margin-top: 0.5em;
+  }
+
+  #toc .toclevel2 {
+    margin-top: 0.25em;
+    display: list-item;
+    color: #aaaaaa;
+  }
+
+  #toctitle {
+    margin-top: 0.5em;
+  }
+}
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install(2);
+/*]]>*/
+</script>
+</head>
+<body class="article" style="max-width:100em">
+<div id="header">
+<h1>Play2 with Scala</h1>
+<div id="toc">
+  <div id="toctitle">Table of Contents</div>
+  <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_play2">1. Play2</h2>
+<div class="sectionbody">
+<div class="paragraph"><div class="title">Fully non-blocking/asynchronous</div><p>Requestler threadleri bloklamaz. Bu sayade bir thread birden fazla isteğe cevap verebilir.</p></div>
+<div class="paragraph"><div class="title">Stateless</div><p>Server tarafında hiçbir state bilgisi tutulmaz.</p></div>
+<div class="paragraph"><div class="title">RESTful</div><p>Client-Server iletişimi HTTP protokolü üzerinden sağlanır.</p></div>
+<div class="paragraph"><div class="title">Hot reloading</div><p>Kod değişikliğinizi sayfayı yenileyerek görebilirsiniz.</p></div>
+<div class="paragraph"><div class="title">Template engine</div><p>HTML, XML gibi text tabanlı döküman oluşturmak için kullanılır.</p></div>
+<div class="paragraph"><div class="title">HTTP routing</div><p>Gelen HTTP Requestler ilgli Actionlara yönlendirilir.</p></div>
+<div class="paragraph"><div class="title">Full stack framework</div><p>All in one</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sample_app">2. Sample-App</h2>
+<div class="sectionbody">
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+<strong>Kullanıcı oluşturma</strong>
+</p>
+<div class="olist loweralpha"><ol class="loweralpha">
+<li>
+<p>
+Client&#8217;dan gelen verinin validasyonu
+</p>
+</li>
+<li>
+<p>
+İlgili modele( User(name,email,password) ) map edilip veritabanına kaydı
+</p>
+</li>
+</ol></div>
+</li>
+<li>
+<p>
+<strong>Tüm kullanıcıları görüntüleme</strong>
+</p>
+<div class="olist loweralpha"><ol class="loweralpha">
+<li>
+<p>
+Veritabanı sorgusu
+</p>
+</li>
+</ol></div>
+</li>
+<li>
+<p>
+<strong>Kullanıcı silme</strong>
+</p>
+<div class="olist loweralpha"><ol class="loweralpha">
+<li>
+<p>
+Verilen id&#8217;ye sahip kullanıcıyı veritabanından silme
+</p>
+</li>
+</ol></div>
+</li>
+</ol></div>
+<div class="sect2">
+<h3 id="_gereksinimler">2.1. Gereksinimler:</h3>
+<div class="ulist"><ul>
+<li>
+<p>
+mongodb
+</p>
+</li>
+<li>
+<p>
+play-2.1.0
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_çalışma_ortamını_düzenleme">2.2. Çalışma ortamını düzenleme:</h3>
+<div class="sect3">
+<h4 id="_play_klasörünü_path_8217_e_ekleme">2.2.1. Play klasörünü PATH&#8217;e ekleme:</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// ~/.bashrc
+
+export PATH="$PATH:path-to-play2"</tt></pre>
+</div></div>
+<div class="sect4">
+<h5 id="_play1_x_bilgisayarında_kurulu_olanlar">play1.x bilgisayarında kurulu olanlar:</h5>
+<div class="listingblock">
+<div class="content">
+<pre><tt>$ mv /path-to-play2/play /path-to-play2/play2</tt></pre>
+</div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Caution" src="data:image/png;base64,
+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
+PD2s/fgvlLDkWQ1/L8QAAAAASUVORK5CYII=" />
+</td>
+<td class="content">Bundan sonraki tüm "play" komutlarının "play2" olarak kullanılması gerekir.</td>
+</tr></table>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_mongodb_8217_yi_çalıştırma">2.2.2. mongodb&#8217;yi çalıştırma:</h4>
+<div class="sect4">
+<h5 id="_mongodb_instance">mongodb instance:</h5>
+<div class="listingblock">
+<div class="content">
+<pre><tt>$ mkdir sampleMongo
+$ /usr/bin/mongod --dbpath sampleMongo/</tt></pre>
+</div></div>
+</div>
+<div class="sect4">
+<h5 id="_mongodb_service">mongodb service:</h5>
+<div class="listingblock">
+<div class="content">
+<pre><tt>$ sudo service mongodb start</tt></pre>
+</div></div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_yeni_proje_oluşturma">2.2.3. Yeni proje oluşturma:</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>$ play new workshop-sample
+$ cd workshop-sample
+$ play run</tt></pre>
+</div></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_kullanıcı_oluşturma">2.3. Kullanıcı oluşturma</h3>
+<div class="sect3">
+<h4 id="_model">2.3.1. Model:</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/models/User.scala
+
+package models
+
+case class User(name: String, email: String, password: String)                //case class
+object User {                                                                 //companion object
+}</tt></pre>
+</div></div>
+<div class="sect4">
+<h5 id="_companion_object">Companion Object:</h5>
+<div class="ulist"><ul>
+<li>
+<p>
+Class&#8217;in akabinde tanımlanır.
+</p>
+</li>
+<li>
+<p>
+Aynı source&#8217;da bulunurlar.
+</p>
+</li>
+<li>
+<p>
+Class&#8217;in private memberlarına ulaşma izni vardır.
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_form">2.3.2. Form:</h4>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Tip" src="data:image/png;base64,
+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" />
+</td>
+<td class="content">Form: Server&#8217;a göndermek üzere kullanıcıdan data alınan html elementi.</td>
+</tr></table>
+</div>
+<div class="paragraph"><p>Form template oluşturarak yapabilabilecekler:
+* Form&#8217;un içeriğinin ne olacağı
+* Form&#8217;dan gelen verilerin validasyonu
+* Verilerin modele bind edilmesi</p></div>
+<div class="sect4">
+<h5 id="_form_template_oluşturma">Form template oluşturma:</h5>
+<div class="listingblock">
+<div class="content">
+<pre><tt>//app/models/User.scala
+
+import play.api.data._
+import play.api.data.Forms._
+import play.api.data.validation.Constraints._
+import play.api.libs.Codecs._
+
+
+object User {
+
+  val userForm = Form(mapping (                                                     // template form
+    "name" -&gt; nonEmptyText,
+    "email" -&gt; email,
+    "password" -&gt; nonEmptyText
+    )
+  )
+}</tt></pre>
+</div></div>
+</div>
+<div class="sect4">
+<h5 id="_validation">Validation:</h5>
+<div class="ulist"><ul>
+<li>
+<p>
+Ön tanımlı validasyonlar:
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>//play.api.data.validation.Constraints
+
+def max (maxValue: Int): Constraint[Int]
+def maxLength (length: Int): Constraint[String]
+def min (minValue: Int): Constraint[Int]
+def minLength (length: Int): Constraint[String]
+def nonEmpty : Constraint[String]
+def pattern (regex: ⇒ Regex, name: String = "constraint.pattern", error: String = "error.pattern"): Constraint[String]</tt></pre>
+</div></div>
+<div class="paragraph"><p>Örneğin:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>    "name" -&gt; nonEmptyText.verifying(minLength(3))                                  // minimum 3 karakter</tt></pre>
+</div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Custom validation:
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Kendi validasyonunuzu tanımlayabilirsiniz.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>//play.api.data.Mappings
+
+def verifying (error: ⇒ String, constraint: (T) ⇒ Boolean): Mapping[T]
+def verifying (constraint: (T) ⇒ Boolean): Mapping[T]</tt></pre>
+</div></div>
+<div class="paragraph"><p>Örneğin:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>  "password" -&gt; nonEmptyText.verifying("not containing !", _.contains("!"))         // "!" içeren text</tt></pre>
+</div></div>
+</div>
+<div class="sect4">
+<h5 id="_binding">Binding</h5>
+<div class="listingblock">
+<div class="content">
+<pre><tt>val userForm = Form(mapping (
+  //Some code...
+)
+(User.apply)(User.unapply)</tt></pre>
+</div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Custom binding:
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>import play.api.libs.Codecs._
+
+val userForm = Form(mapping (
+  //Some code...
+  )
+  {                                                                                 //binding
+    (name, email, password) =&gt; User(name, email, sha1(password))                      // şifreyi hashle
+  }
+  {                                                                                 //unbinding
+    user =&gt; Some(user.name,user.email,"")                                             // şifre kısmını boş bırak
+  }
+)</tt></pre>
+</div></div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_view">2.3.3. View:</h4>
+<div class="ulist"><ul>
+<li>
+<p>
+Kullanıcı oluşturma sayfası.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Eğer standart form oluştursaydık:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/views/user.scala.html
+
+@main("Sample App"){
+  &lt;form id="signup" action="/user" method="POST" accept-charset="${_response_encoding}"&gt;
+  &lt;p&gt;
+    &lt;label&gt;Name&lt;/label&gt;
+    &lt;input type="text" name="name"  /&gt;
+  &lt;/p&gt;
+  &lt;p&gt;
+    &lt;label&gt;Email&lt;/label&gt;
+    &lt;input type="text" name="email" /&gt;
+  &lt;/p&gt;
+  &lt;p&gt;
+    &lt;label&gt;Password&lt;/label&gt;
+    &lt;input type="password" name="password" /&gt;
+  &lt;/p&gt;
+    &lt;input type="submit" value="Signup"/&gt;
+&lt;/form&gt;
+}</tt></pre>
+</div></div>
+<div class="sect4">
+<h5 id="_helpers">Helpers</h5>
+<div class="paragraph"><p>Helper sayesinde;</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+İlgili field'ın template-form&#8217;da hangi alana karşılık düştüğünü
+</p>
+</li>
+<li>
+<p>
+Field'ın türünü
+</p>
+</li>
+<li>
+<p>
+Hatalı giriş yapıldığına görüntülenecek uyarı mesajını
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>kolayca belirleyebiliyoruz.</p></div>
+<div class="paragraph"><p>Ihtiyaca göre düzenlenebilir.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// views.html.helper.FieldConstructor
+
+def apply (f: (FieldElements) ⇒ Html): FieldConstructor</tt></pre>
+</div></div>
+<div class="paragraph"><p>Helper&#8217;lar yardımıyla oluşturulmuş form:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/views/user.scala.html
+
+@(userForm:Form[models.User])                                                       //alınan parametreler
+@import helper._
+
+@main("Sample App"){
+  @form(routes.Application.newUser){                                                //form isteğinin gideceği yer
+    &lt;div&gt;
+      &lt;ul&gt;
+        &lt;li&gt;
+          @inputText( userForm("name"))
+        &lt;/li&gt;
+        &lt;li&gt;
+          @inputText( userForm("email"))
+        &lt;/li&gt;
+        &lt;li&gt;
+          @inputPassword( userForm("password"))
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+    &lt;input type= "submit" value= "Create" &gt;
+
+  }
+}</tt></pre>
+</div></div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_controller">2.3.4. Controller:</h4>
+<div class="sect4">
+<h5 id="_kullanıcı_oluşturma_formunu_render_etme">Kullanıcı oluşturma formunu render etme:</h5>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/controllers/Application.scala
+
+package controllers
+
+import play.api._
+import play.api.mvc._
+
+import models._
+
+object Application extends Controller with MongoController{
+
+def user = Action {
+    Ok(views.html.user(User.userForm))
+  }
+}</tt></pre>
+</div></div>
+</div>
+<div class="sect4">
+<h5 id="_route_belirleme">Route belirleme:</h5>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/conf/routes
+
+GET     /user           controllers.Application.user</tt></pre>
+</div></div>
+<div class="paragraph"><p>Artık localhost:9000/user urlsi bizi kullanıcı oluşturma sayfasına yönlendirebilir.</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Warning" src="data:image/png;base64,
+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
+F1CRAAAAAElFTkSuQmCC" />
+</td>
+<td class="content">"user.scala.html" de belirttiğimiz "Application.newUser" metodu henüz tanımlanmadığından hata alınacaktır.</td>
+</tr></table>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_veritabanına_kayıt">2.3.5. Veritabanına kayıt</h4>
+<div class="sect4">
+<h5 id="_reactivemongo">ReactiveMongo</h5>
+<div class="ulist"><ul>
+<li>
+<p>
+non-blocking mongodb server.
+</p>
+</li>
+<li>
+<p>
+Play2 iteratee&#8217;lerini kullanır.
+Iteratee: Belirli bir veri öbeği(List, Dosya, Veri Tabanı, Stream vs.) üzerinde non-blocking iterasyon sağlar.
+Enumerator (produce data) → Enumeratee (map data) → Iteratee (consume data)
+</p>
+</li>
+<li>
+<p>
+Bağımlılıkları düzenleme:
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>//project/Build.scala
+
+
+import sbt._
+import Keys._
+import play.Project._
+
+object ApplicationBuild extends Build {
+
+  val appName         = "workshop-sample"
+  val appVersion      = "1.0-SNAPSHOT"
+
+  val appDependencies = Seq(
+    "reactivemongo" %% "reactivemongo" % "0.1-SNAPSHOT" cross CrossVersion.full,
+    "play.modules.reactivemongo" %% "play2-reactivemongo" % "0.1-SNAPSHOT" cross CrossVersion.full
+  )
+
+  val main = play.Project(appName, appVersion, appDependencies).settings(
+    resolvers += "sgodbillon" at "https://bitbucket.org/sgodbillon/repository/raw/master/snapshots/"
+  )
+
+}</tt></pre>
+</div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+ReactiveMongo plugini ekleme:
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>//conf/play.plugins
+
+400:play.modules.reactivemongo.ReactiveMongoPlugin</tt></pre>
+</div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Veritabanı konfigürasyonu:
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>//conf/application.conf
+
+# Database configuration
+mongodb.servers = ["127.0.0.1:27017"]
+mongodb.db = "testDB"</tt></pre>
+</div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+importlar:
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/controllers/Application.scala
+
+import play.api.libs.functional.syntax._
+import play.api.Play.current
+
+import reactivemongo.api._
+import reactivemongo.bson._
+import reactivemongo.bson.handlers.DefaultBSONHandlers._
+
+import play.modules.reactivemongo._
+import play.modules.reactivemongo.PlayBsonImplicits._</tt></pre>
+</div></div>
+</div>
+<div class="sect4">
+<h5 id="_formdan_gelen_post_isteğini_handle_etme">Formdan gelen POST isteğini handle etme:</h5>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/controllers/Application.scala
+
+object Application extends Controller with MongoController{
+
+  val db = ReactiveMongoPlugin.db
+  val collection = db.collection("testcollection")
+
+  //Some code...
+
+  def newUser = Action{ implicit request =&gt;   /*1*/
+    User.userForm.bindFromRequest.fold(     /*2*/
+      formWithErrors =&gt; {                                                           //if form has errors
+        Ok(views.html.user(formWithErrors))                                         //render form with errors
+      },
+      value =&gt; {                                                                    //if post value is valid
+        Async{                             /*3*/
+          val user = BSONDocument(                                                  //create new json for writing to database
+            "name" -&gt; BSONString(value.name),
+            "email" -&gt; BSONString(value.email),
+            "password" -&gt; BSONString(value.password)
+          )
+          collection.insert[BSONDocument](user).map(_ =&gt; /*4*/                      //write value to the database
+            Redirect(routes.Application.index)                                      //redirect to index page
+          )
+        }
+      }
+    )
+  }
+}</tt></pre>
+</div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Note" src="data:image/png;base64,
+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
+YII=" />
+</td>
+<td class="content">1) implicit parameter: Değer belirtilmemiş ise Scope&#8217;unda tanımlanmış implicit değişkeni kullanır.</td>
+</tr></table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>&gt; def p(implicit i:Int) = print(i)
+&gt; implicit val v=2
+&gt; p
+&gt; p(1)</tt></pre>
+</div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Note" src="data:image/png;base64,
+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
+YII=" />
+</td>
+<td class="content">2) bindFromRequest: Request&#8217;deki datayı forma bind eder.</td>
+</tr></table>
+</div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Note" src="data:image/png;base64,
+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
+YII=" />
+</td>
+<td class="content">3) Async block: Promise[result]'ı AsyncResult&#8217;a dönüştürür. (play.api.mvc.AsyncResult)
+Bu da play HTTP response hazır olana request&#8217;i askıya alır.
+Dolayısıyla thread boşa çıkar, diğer request&#8217;lere cevap verebilir.</td>
+</tr></table>
+</div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Note" src="data:image/png;base64,
+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
+YII=" />
+</td>
+<td class="content">4) insert().map(): Insert metodu Future döndürür.</td>
+</tr></table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>//reactivemongo.api.Collection
+
+def insert[T](document: T)(implicit writer: RawBSONWriter[T], ec: ExecutionContext): Future[LastError]</tt></pre>
+</div></div>
+<div class="paragraph"><p>Dönen future degerini kullanmak için(değer oluştuğunda yapılacak işlemi tanımlamak için) map kullanılır.
+Map future değeri(burada Future[LastError]) normal değere(LastError) döndürür gibi düşünülebilir.</p></div>
+</div>
+<div class="sect4">
+<h5 id="_route">Route</h5>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/conf/routes
+
+POST    /user                 controllers.Application.newUser</tt></pre>
+</div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Tip" src="data:image/png;base64,
+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" />
+</td>
+<td class="content">Su anda eğer herşey doğru yapıldıysa localhost:9000/user urlsine erişebilir ve form doldurularak kullanıcı veritabanına kaydedilebilir.</td>
+</tr></table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_kullanıcıları_görüntüleme">2.4. Kullanıcıları görüntüleme</h3>
+<div class="sect3">
+<h4 id="_veritabanı_sorgusu">2.4.1. Veritabanı sorgusu</h4>
+<div class="ulist"><ul>
+<li>
+<p>
+Reactivemongo find sorgusu:
+</p>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// reactivemongo.api.Collection
+
+def find[Rst](query: QueryBuilder)(implicit handler: BSONReaderHandler, reader: RawBSONReader[Rst], ec: ExecutionContext): FlattenedCursor[Rst]</tt></pre>
+</div></div>
+<div class="paragraph"><p>QueryBuilder: Mongodb sorgu dokümanı oluşturur.</p></div>
+<div class="paragraph"><p>Örneğin:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>val qb = QueryBuilder().query(BSONDocument(
+      "name" -&gt; BSONString("hasan")))
+
+//mongodb'deki karşılığı:
+
+&gt;db.testcollection.find( {name: "hasan"} )</tt></pre>
+</div></div>
+<div class="paragraph"><p>Tüm kullanıcıları bulma:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/controllers/Application.scala
+
+import play.api.libs.json._
+
+val db = ReactiveMongoPlugin.db
+val collection = db.collection("testcollection")
+implicit val userFormat = Json.format[User]
+
+def index = Action {
+    Async{
+      val qb = QueryBuilder().query( BSONDocument() )                  //db.testcollection.find() hepsini bulur
+      (collection.find[JsValue](qb).toList).map(jsusers =&gt;{
+        val users=jsusers.map(jsuser =&gt;
+          jsuser.as[User])
+        Ok(views.html.index(users))
+      })
+    }
+}</tt></pre>
+</div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Caution" src="data:image/png;base64,
+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
+PD2s/fgvlLDkWQ1/L8QAAAAASUVORK5CYII=" />
+</td>
+<td class="content">Simplified json-reads şekli companion objectlerle birlikte çalışmadığı için companion objesinini adını değiştiriyoruz.</td>
+</tr></table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/models/User.scala
+
+object UserM{...}
+
+//app/controller/Application.scala
+
+ def newUser = Action{ implicit request =&gt;   /*1*/
+    UserM.userForm.bindFromRequest.fold(..)
+ }
+
+
+ def user = Action {
+    Ok(views.html.user(UserM.userForm))
+ }</tt></pre>
+</div></div>
+<div class="paragraph"><p>View&#8217;de alınan veriyi işleme</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/views/index.scala.html
+
+@(users: List[models.User])
+
+@main("Sample App") {
+  &lt;a href="/user"&gt;new&lt;/a&gt;
+  &lt;ul&gt;
+    @users.map { user =&gt;
+      &lt;li&gt;
+       &lt;ul class="user"&gt;
+        &lt;li&gt;@user.name&lt;/li&gt;
+        &lt;li&gt;@user.email&lt;/li&gt;
+        &lt;li&gt;@user.password&lt;/li&gt;
+       &lt;/ul&gt;
+      &lt;/li&gt;
+    }
+  &lt;/ul&gt;
+}</tt></pre>
+</div></div>
+<div class="paragraph"><p>css</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// public/stylesheets/main.css
+
+.user li{
+ display:inline;
+ margin-left: 10px;
+}</tt></pre>
+</div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Tip" src="data:image/png;base64,
+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" />
+</td>
+<td class="content">İşler yolundaysa localhost:9000&#8217;de kullanıcılarin görüntülenmesi lazım</td>
+</tr></table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_kullanıcı_silme">2.5. Kullanıcı Silme</h3>
+<div class="paragraph"><p>Kullanıcı silme için id gerekli.</p></div>
+<div class="sect3">
+<h4 id="_modele_id_ekleme">2.5.1. Modele id ekleme:</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/models/User.scala
+
+case class User(id: Option[String] = None, name: String, email: String, password: String)
+...
+
+...
+{                                                                                 //binding
+      (name, email, password) =&gt; User(None, name, email, sha1(password))
+}</tt></pre>
+</div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img alt="Tip" src="data:image/png;base64,
+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" />
+</td>
+<td class="content">mongodb de object id  { _id: { oid:"&#8230;"} &#8230;} şeklinde tutulduğu için json-reads direk okuyamıyor.
+Bunun için veritabanından gelen json&#8217;u { id:"&#8230;"} olacak şekilde düzenleyen bir validator kullanılıyor.</td>
+</tr></table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/controllers/Application.scala
+
+val idfixer= __.json.update( (__ \ 'id).json.copyFrom( (__ \ '_id \ '$oid).json.pick ) )
+
+
+def index = Action {
+    Async{
+      ...
+        val users=jsusers.map(jsuser =&gt;
+          jsuser.validate(idfixer).get.as[User])
+      ...
+}</tt></pre>
+</div></div>
+<div class="paragraph"><p>Kullanıcı silme metodu:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/controllers/Application.scala
+
+def removeUser(id: String) = Action{ implicit request =&gt;
+  Async{
+    val qry =SONDocument("_id" -&gt; new BSONObjectID(id))
+    collection.remove(qry).map(_ =&gt;
+      Redirect(routes.Application.index)
+    )
+  }
+}</tt></pre>
+</div></div>
+<div class="paragraph"><p>View&#8217;de silme butonu:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/views/index.scala.html
+
+&lt;ul class="user"&gt;
+  ...
+  &lt;li&gt;&lt;a href="/remove/@user.id"&gt;Sil&lt;/a&gt;
+&lt;/ul&gt;</tt></pre>
+</div></div>
+<div class="paragraph"><p>Route:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>// app/conf/routes
+
+GET    /remove/:id              controllers.Application.removeUser(id: String)
+-
+Benchmark</tt></pre>
+</div></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>$ ab -n 1000 -c 5 -p ~/Desktop/post -T "application/x-www-form-urlencoded"  http://localhost:9000/user
+
+-n -&gt; number of requests
+-c -&gt; concurrent requests
+-p -&gt; post data
+-T -&gt; post type</tt></pre>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bağlantılar">3. Bağlantılar</h2>
+<div class="sectionbody">
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="http://www.playframework.org">http://www.playframework.org</a>
+</p>
+</li>
+<li>
+<p>
+<a href="http://groups.google.com/group/play-framework">http://groups.google.com/group/play-framework</a>
+</p>
+</li>
+<li>
+<p>
+<a href="http://groups.google.com/group/play-framework-tr">http://groups.google.com/group/play-framework-tr</a>
+</p>
+</li>
+<li>
+<p>
+<a href="http://www.reactivemongo.org">http://www.reactivemongo.org</a>
+</p>
+</li>
+<li>
+<p>
+<a href="https://groups.google.com/forum/?fromgroups#!forum/reactivemongo">https://groups.google.com/forum/?fromgroups#!forum/reactivemongo</a>
+</p>
+</li>
+</ul></div>
+<div class="ulist"><div class="title">Further reading</div><ul>
+<li>
+<p>
+<a href="http://www.infoq.com/presentations/Play-I-ll-See-Your-Async-and-Raise-You-Reactive?utm_source=infoq&amp;utm_medium=related_content_link&amp;utm_campaign=relatedContent_interviews_clk">http://www.infoq.com/presentations/Play-I-ll-See-Your-Async-and-Raise-You-Reactive?utm_source=infoq&amp;utm_medium=related_content_link&amp;utm_campaign=relatedContent_interviews_clk</a>
+</p>
+</li>
+<li>
+<p>
+<a href="http://stephane.godbillon.com/2012/08/30/reactivemongo-for-scala-unleashing-mongodb-streaming-capabilities-for-realtime-web">http://stephane.godbillon.com/2012/08/30/reactivemongo-for-scala-unleashing-mongodb-streaming-capabilities-for-realtime-web</a>
+</p>
+</li>
+<li>
+<p>
+<a href="http://stephane.godbillon.com/2012/10/18/writing-a-simple-app-with-reactivemongo-and-play-framework-pt-1.html">http://stephane.godbillon.com/2012/10/18/writing-a-simple-app-with-reactivemongo-and-play-framework-pt-1.html</a>
+</p>
+</li>
+<li>
+<p>
+<a href="http://mandubian.com/2012/08/27/understanding-play2-iteratees-for-normal-humans/">http://mandubian.com/2012/08/27/understanding-play2-iteratees-for-normal-humans/</a>
+</p>
+</li>
+<li>
+<p>
+<a href="http://engineering.klout.com/2013/01/iteratees-in-big-data-at-klout/">http://engineering.klout.com/2013/01/iteratees-in-big-data-at-klout/</a>
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr /></div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2013-02-17 15:39:42 EET
+</div>
+</div>
+</body>
+</html>
